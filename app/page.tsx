@@ -1,16 +1,22 @@
 import React from 'react'
 import Image from 'next/image'
+import HeroSection from './herocards/HeroSection'
+
+
 
 const Home = () => {
   return (
-    <div className='flex w-full items-center justify-center flex-col'>
+    <div className='flex w-full text-gray-700 items-center justify-center flex-col'>
       <div className='flex w-full items-center justify-center flex-col lg:grid lg:grid-cols-2 lg:gap-3'>
         <div className='flex p-5 flex-col items-center min-w-full'>
-          <h1 className='text-4xl lg:text-5xl font-bold flex w-full dark:text-white'>
+          <h1 className='text-4xl  lg:text-5xl font-bold flex w-full dark:text-white'>
             <span className='dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)] mr-2'>Track</span> your habits
           </h1>
-          <h1 className='text-4xl lg:text-5xl font-bold flex w-full dark:text-white'>
+          <h1 className='text-4xl mt-2 lg:text-5xl font-bold flex w-full dark:text-white'>
             Improve your <span className='dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)] ml-2'>Life</span>
+          </h1>
+           <h1 className=' mt-2 hidden md:flex  lg:text-4xl font-bold w-full dark:text-white'>
+            Own your Day
           </h1>
           <p className='text-[13px] flex w-full mt-4 dark:text-gray-300'>
             Because the smallest daily actions shape the strongest futures. Stay consistent. Stay accountable. Stay growing.
@@ -48,6 +54,9 @@ const Home = () => {
               Log in
             </button>
           </div>
+      </div>
+      <div className='flex w-full items-center justify-center'>
+        <HeroSection />
       </div>
     </div>
   )
