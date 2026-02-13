@@ -1,6 +1,8 @@
 import React from 'react'
 import Image from 'next/image'
 import HeroSection from './herocards/HeroSection'
+import Footer from './components/Footer'
+import Link from 'next/link'
 
 
 
@@ -22,12 +24,12 @@ const Home = () => {
             Because the smallest daily actions shape the strongest futures. Stay consistent. Stay accountable. Stay growing.
           </p>
           <div className='w-full items-center hidden md:flex gap-5 mt-4'>
-            <button className='px-5 py-2 w-30 bg-[rgba(8,185,103,0.8)] text-white rounded-md font-medium cursor-pointer hover:bg-[#59ffb1cc]/90 transition duration-300'>
+            <Link href='/auth/signup' className='px-5 py-2 w-30 bg-[rgba(8,185,103,0.8)] text-white rounded-md font-medium cursor-pointer hover:bg-[#59ffb1cc]/90 transition duration-300'>
               Sign Up
-            </button>
-            <button className='px-5 w-50 py-2 border border-[rgba(8,185,103,0.8)] dark:border-white dark:text-white rounded-md font-medium cursor-pointer bg-[#59ffb1cc]/10 dark:bg-inherit transition duration-300'>
+            </Link>
+            <Link href='/auth/login' className='px-5 w-50 py-2 border border-[rgba(8,185,103,0.8)] dark:border-white dark:text-white rounded-md font-medium cursor-pointer bg-[#59ffb1cc]/10 dark:bg-inherit transition duration-300'>
               Log in
-            </button>
+            </Link>
           </div>
         </div>
         <div className='flex w-full items-center justify-center p-5'>
@@ -47,17 +49,18 @@ const Home = () => {
           />
         </div>
         <div className='w-full items-center flex md:hidden p-5 justify-between gap-5 mt-4'>
-            <button className='px-5 py-2 w-30 bg-[rgba(8,185,103,0.8)] text-white rounded-md font-medium cursor-pointer hover:bg-[#59ffb1cc]/90 transition duration-300'>
+            <Link href='/auth/signup' className='px-5 py-2 w-30 bg-[rgba(8,185,103,0.8)] text-white rounded-md font-medium cursor-pointer hover:bg-[#59ffb1cc]/90 transition duration-300'>
               Sign Up
-            </button>
-            <button className='px-5 w-50 py-2 border border-[rgba(8,185,103,0.8)] dark:border-white dark:text-white rounded-md font-medium cursor-pointer bg-[#59ffb1cc]/10 dark:bg-inherit transition duration-300'>
+            </Link>
+            <Link href='/auth/login' className='px-5 w-50 py-2 border border-[rgba(8,185,103,0.8)] dark:border-white dark:text-white rounded-md font-medium cursor-pointer bg-[#59ffb1cc]/10 dark:bg-inherit transition duration-300'>
               Log in
-            </button>
+            </Link>
           </div>
       </div>
       <div className='flex w-full items-center justify-center'>
         <HeroSection />
       </div>
+      <Footer />
     </div>
   )
 }
