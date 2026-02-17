@@ -38,6 +38,7 @@ const SignUp = () => {
               Sign Up
               
             </button>
+            <p className='text-sm mt-2 text-gray-500 dark:text-gray-300'>Already have an account? <a href='/auth/login' className='text-[rgba(8,185,103,0.8)] dark:text-[#59ffb1cc] cursor-pointer'>Log in</a></p>
           </form>
         </div>
       </div>
