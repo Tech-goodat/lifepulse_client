@@ -6,7 +6,7 @@ import { GoEyeClosed } from "react-icons/go"
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const handlePasswordView = (e )=>{
+  const handlePasswordView = (e:React.MouseEvent<HTMLButtonElement> )=>{
     e.preventDefault();
     setShowPassword(!showPassword)
   }
@@ -30,11 +30,11 @@ const SignUp = () => {
             <input className='w-full text-sm p-2 border outline-none border-gray-300 rounded-md dark:bg-inherit dark:border-gray-700' type='text' placeholder='Your Email' />
             <div className='flex w-full items-center justify-between border border-gray-300 rounded-md dark:border-gray-700 px-2'>
             <input className='w-full text-sm p-2  outline-none  dark:bg-inherit' type={showPassword ? "text" : "password"} placeholder='Create a Password' />
-            <button  className='text-gray-700 cursor-pointer dark:text-gray-500' onClick={handlePasswordView}>
+            <button type='button'  className='text-gray-700 cursor-pointer dark:text-gray-500' onClick={handlePasswordView}>
             {showPassword ? <GoEyeClosed /> : <FaRegEye />}
             </button>
             </div>
-            <button className='w-full flex justify-center items-center text-sm p-2 bg-[rgba(8,185,103,0.8)] text-white rounded-md font-medium cursor-pointer hover:bg-[#59ffb1cc]/90 transition duration-300'>
+            <button type='submit' className='w-full flex justify-center items-center text-sm p-2 bg-[rgba(8,185,103,0.8)] text-white rounded-md font-medium cursor-pointer hover:bg-[#59ffb1cc]/90 transition duration-300'>
               Sign Up
               
             </button>
