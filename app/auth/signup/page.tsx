@@ -3,8 +3,10 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { FaRegEye } from "react-icons/fa";
 import { GoEyeClosed } from "react-icons/go"
+import { useRouter } from 'next/navigation';
 
 const SignUp = () => {
+  const router=useRouter()
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData]=useState({
     username:'',
@@ -12,7 +14,7 @@ const SignUp = () => {
     password:''
   })
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const { name, value } = e.target;
   setUserData(prev => ({
     ...prev,
@@ -20,7 +22,7 @@ const SignUp = () => {
   }));
 };
 
-  const HandleSubmit=(e)=>{
+  const HandleSubmit=(e: React.FormEvent<HTMLFormElement>)=>{
     e.preventDefault()
     fetch('http://127.0.0.1:5555/register',{
       method:'POST',
@@ -39,6 +41,7 @@ const SignUp = () => {
       sessionStorage.setItem(
         'token', data.access_token
       )
+       router.push('/dashboard')
     }))
     .catch(error=>{console.error('failed to sign up', error)})
     
