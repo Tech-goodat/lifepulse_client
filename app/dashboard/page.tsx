@@ -14,6 +14,7 @@ interface User {
   username: string
   email: string
 }
+
 interface Log {
   id: number
   average_sleep: string
@@ -38,30 +39,32 @@ const Home = () => {
   const [totalMeditation, setTotalMeditation] = useState<number>(0)
   const [logCount, setLogCount] = useState<number>(0)
 
-  const latestLog = userLogs[0]
-
-  const token = sessionStorage.getItem('token')
-  const id = sessionStorage.getItem('id')
+  // ✅ SAFE sessionStorage access
+  const [token, setToken] = useState<string | null>(null)
+  const [id, setId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!token || !id) {
-      setError('User not logged in')
-      setLoading(false)
-      return
+    if (typeof window !== 'undefined') {
+      setToken(sessionStorage.getItem('token'))
+      setId(sessionStorage.getItem('id'))
     }
+  }, [])
+
+  const latestLog = userLogs[0]
+
+  useEffect(() => {
+    if (!token || !id) return
 
     const fetchUserDetails = async () => {
       try {
         const res = await fetch(`http://127.0.0.1:5555/userdetails/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-
         if (!res.ok) throw new Error('Failed to fetch user details')
-
         const data: User = await res.json()
         setUserDetails(data)
       } catch (err: any) {
-        setError(err.message || 'Something went wrong')
+        setError(err.message)
       } finally {
         setLoading(false)
       }
@@ -71,27 +74,21 @@ const Home = () => {
   }, [token, id])
 
   useEffect(() => {
+    if (!token) return
     fetch(`http://127.0.0.1:5555/logs`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => {
-        if (!res.ok) throw new Error('failed to get details')
-        return res.json()
-      })
-      .then((data) => setUserLogs(data))
-      .catch(err => console.error(err))
-  }, [])
+      .then(res => res.json())
+      .then(setUserLogs)
+      .catch(console.error)
+  }, [token])
 
   useEffect(() => {
     if (!token) return
-
     fetch("http://127.0.0.1:5555/logs/totals", {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch totals")
-        return res.json()
-      })
+      .then(res => res.json())
       .then(data => {
         setAvgSleep(data.avg_sleep)
         setTotalWater(data.total_water)
@@ -102,19 +99,23 @@ const Home = () => {
       .catch(console.error)
   }, [token])
 
-  function getMedal(logCount: number) {
-    if (logCount >= 6) return "gold"
-    if (logCount >= 4) return "bronze"
-    if (logCount >= 2) return "silver"
+  function getMedal(count: number) {
+    if (count >= 6) return "gold"
+    if (count >= 4) return "bronze"
+    if (count >= 2) return "silver"
     return "none"
   }
 
-  const medalImage = getMedal(logCount) !== "none" ? `/${getMedal(logCount)}.png` : null
+  // ✅ YOUR ORIGINAL CALENDAR CLASSES RESTORED
+  const calendarClasses = [
+    'text-dark:text-[#59ffb1cc]',
+    'text-[rgba(8,185,103,0.8)]',
+    'text-[12px]',
+    'rounded-md'
+  ]
 
   if (loading) return <div className="flex w-full items-center justify-center">Loading...</div>
   if (error) return <div className="flex w-full items-center justify-center text-red-500">{error}</div>
-
-  const calendarClasses=[' text-dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)] h- text-[12px]  rounded-md']
 
   const doughnutData = {
     labels: ['Water', 'Exercise', 'Meditation', 'Sleep'],
@@ -123,206 +124,127 @@ const Home = () => {
         label: 'Your Stats',
         data: [totalWater, totalExercise, totalMeditation, avgSleep],
         backgroundColor: ['#34d399', '#fb923c', '#22d3ee', '#6366f1'],
-        borderWidth: 1,
       },
     ],
   }
 
   return (
-    <div className="flex w-full flex-col lg:grid lg:grid-cols-3 gap-5 iems-center justify-center">
-      <div className='col-span-2 flex w-full items-center flex-col'>
-        <section className='flex bg-gray-100 dark:bg-[#212121] p-4 rounded-lg lg:grid grid-cols-3 w-full items-center justify-between flex-col'>
+    <div className="flex w-full flex-col lg:grid lg:grid-cols-3 gap-5">
+
+      <div className='col-span-2 flex w-full flex-col items-center'>
+
+        {/* HERO */}
+        <section className='flex bg-gray-100 dark:bg-[#212121] p-4 rounded-lg lg:grid grid-cols-3 w-full items-center'>
           <div className='flex col-span-2 flex-col items-center'>
             <h1 className='flex w-full text-xl'>
               Hello 
-              <span className='ml-2 dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)]'>
+              <span className='ml-2 text-emerald-400'>
                 {userDetails?.username}!
               </span>
             </h1>
-             <p className='text-[12px] flex w-full mt-4 dark:text-gray-300'>
-              Small steps today lead to better health tomorrow. Every positive choice you make adds up over time, so keep going at your own pace. Consistency matters more than perfection and today’s effort is an investment in your future wellbeing. 💚
+            <p className='text-[12px] flex w-full mt-4 dark:text-gray-300'>
+              Small steps today lead to better health tomorrow.
             </p>
           </div>
-
-          <Image 
-            src='/hero.png'
-            alt='hero'
-            width={200}
-            height={200}
-            className='w-40 block h-auto object-cover'
-          />
+          <Image src='/hero.png' alt='hero' width={200} height={200} className='w-40 h-auto object-cover'/>
         </section>
 
-        {
-          userLogs.length < 1 ? <div className='flex mt-5 flex-col w-full items-center justify-center'>
-            
-            <Image  src='/tomandjerry.png'
-            alt='hero'
-            width={200}
-            height={200}
-            className='w-60 block h-auto object-cover'/>
-            <h1>Oops ! You don't have any statistics yet.</h1>
-            <p className='text-[13px] flex'>Visit <Link className='flex ml-2 mr-2  text-dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)]' href='/dashboard/logs'>Create Logs</Link> To create new logs</p>
-          </div> : <>
-  <section className='flex mt-3 lg:grid lg:grid-cols-4 gap-4 bg-gray-100 dark:bg-[#212121] p-4 rounded-md w-full items-center justify-center'>
-    {/* Water Card */}
-    <div className='grid  bg-linear-to-r from-emerald-400  to-teal-500 grid-cols-3 items-center justify-center gap-2 p-2 bg-white dark:bg-[#2a2a2a] rounded-md'>
-      <section>
-        <Image 
-          src='/water.jpg'
-          alt='hero'
-          width={100}
-          height={100}
-          className='w-10 h-10 rounded-full block object-cover'
-        />
-      </section>
-      <section className='col-span-2 flex flex-col items-center w-full'>
-        <h1 className='text-dark:text-[#59ffb1cc] text-[rgba(23,23,23,0.8)] text-[12px] w-full'>Water Taken</h1>
-        <p className='text-[15px] w-full flex items-center'>{totalWater} <span className='ml-2 text-[12px]'>Gallons</span></p>
-      </section>
-    </div>
-
-    {/* Exercise Card */}
-    <div className='grid grid-cols-3 bg-linear-to-r from-orange-500 to-pink-500 items-center justify-center gap-2 p-2 bg-white dark:bg-[#2a2a2a] rounded-md'>
-      <section>
-        <Image 
-          src='/fitness.jpg'
-          alt='hero'
-          width={100}
-          height={100}
-          className='w-10 h-10 rounded-full block object-cover'
-        />
-      </section>
-      <section className='col-span-2 flex flex-col items-center w-full'>
-        <h1 className='text-dark:text-[#59ffb1cc] text-[rgba(255,255,255,0.8)] text-[12px] w-full'>Exercise Time</h1>
-        <p className='text-[15px] w-full flex items-center'>{totalExercise} <span className='ml-2 text-[12px]'>Hours</span></p>
-      </section>
-    </div>
-
-    {/* Meditation Card */}
-    <div className='grid grid-cols-3 bg-linear-to-r from-cyan-400 to-blue-500 items-center justify-center gap-2 p-2 bg-white dark:bg-[#2a2a2a] rounded-md'>
-      <section>
-        <Image 
-          src='/meditation.jpg'
-          alt='hero'
-          width={100}
-          height={100}
-          className='w-10 h-10 rounded-full block object-cover'
-        />
-      </section>
-      <section className='col-span-2 flex flex-col items-center w-full'>
-        <h1 className='text-dark:text-[#59ffb1cc] text-[rgba(255,255,255,0.8)] text-[12px] w-full'>Meditation</h1>
-        <p className='text-[15px] w-full flex items-center'>{totalMeditation} <span className='ml-2 text-[12px]'>Minutes</span></p>
-      </section>
-    </div>
-
-    {/* Sleep Card */}
-    <div className='grid grid-cols-3 bg-linear-to-r from-indigo-500 to-purple-600 items-center justify-center gap-2 p-2 bg-white dark:bg-[#2a2a2a] rounded-md'>
-      <section>
-        <Image 
-          src='/sleep.jpg'
-          alt='hero'
-          width={100}
-          height={100}
-          className='w-10 h-10 rounded-full block object-cover'
-        />
-      </section>
-      <section className='col-span-2 flex flex-col items-center w-full'>
-        <h1 className='text-dark:text-[#59ffb1cc] text-[rgba(255,255,255,0.8)] text-[12px] w-full'>Average Sleep</h1>
-        <p className='text-[15px] w-full flex items-center'>{avgSleep} <span className='ml-2 text-[12px]'>Hours</span></p>
-      </section>
-    </div>
-  </section>
-  <section className='flex rounded-md h-15 w-full items-center bg-linear-to-r from-emerald-400  to-teal-500 mt-3 ' >
-
-    {latestLog && (
-  <section className="flex flex-col w-full items-center justify-center">
-    <h2 className="text-sm ">Quote of the Day</h2>
-    <p className="mt-1 text-[12px] text-gray-700 items-center text-center justify-center flex w-full">
-      {latestLog.quote_of_the_day}
-    </p>
-  </section>
-)}
-
- </section>
- <section className='w-full items-center justify-center grid grid-cols-2 mt-3 gap-4'>
-          {/* Donut chart */}
-          <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-[#212121] rounded-md">
-            <Doughnut data={doughnutData} />
+        {userLogs.length < 1 ? (
+          <div className='flex mt-5 flex-col w-full items-center'>
+            <Image src='/tomandjerry.png' alt='empty' width={200} height={200}/>
+            <h1>No statistics yet.</h1>
+            <p className='text-[13px]'>
+              Visit <Link className='text-emerald-400 ml-1 mr-1' href='/dashboard/logs'>Create Logs</Link>
+            </p>
           </div>
+        ) : (
+          <>
+            {/* STATS CARDS */}
+            <section className='grid lg:grid-cols-4 gap-4 bg-gray-100 dark:bg-[#212121] p-4 rounded-md w-full mt-3'>
 
-          <section className='w-full flex flex-col items-center justify-center mt-3'>
-  {logCount >= 2 ? (
-    <div className="flex flex-col items-center">
-     
-      <Image
-        src={`/${getMedal(logCount)}.png`}
-        alt={`${getMedal(logCount)} medal`}
-        width={100}
-        height={100}
-        className="w-30 h-45 object-contain"
-      />
-      <p className="mt-2 text-[12px] text-center">
-        {getMedal(logCount).charAt(0).toUpperCase() + getMedal(logCount).slice(1)} medal for your dedication. Keep winning!
-      </p>
-    </div>
-  ) : (
-    <div className="flex flex-col items-center">
-      <h2 className="text-sm mb-2">No Medal Yet!</h2>
-      <Image
-        src="/tomandjerry.png"
-        alt="No medal"
-        width={100}
-        height={100}
-        className="w-24 h-24 object-contain"
-      />
-      <p className="mt-2 text-[12px] text-center">
-        Start a streak! Create 3 logs to earn your first medal 🏅
-      </p>
-    </div>
-  )}
-</section>
-        </section>
-</>
-        }
+              <div className='grid grid-cols-3 items-center gap-2 p-3 rounded-md text-white bg-gradient-to-r from-emerald-400 to-teal-500'>
+                <Image src='/water.jpg' alt='water' width={40} height={40} className='rounded-full'/>
+                <div className='col-span-2'>
+                  <h1 className='text-xs'>Water Taken</h1>
+                  <p>{totalWater} <span className='text-xs'>Gallons</span></p>
+                </div>
+              </div>
 
+              <div className='grid grid-cols-3 items-center gap-2 p-3 rounded-md text-white bg-gradient-to-r from-orange-500 to-pink-500'>
+                <Image src='/fitness.jpg' alt='fitness' width={40} height={40} className='rounded-full'/>
+                <div className='col-span-2'>
+                  <h1 className='text-xs'>Exercise</h1>
+                  <p>{totalExercise} <span className='text-xs'>Hours</span></p>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-3 items-center gap-2 p-3 rounded-md text-white bg-gradient-to-r from-cyan-400 to-blue-500'>
+                <Image src='/meditation.jpg' alt='meditation' width={40} height={40} className='rounded-full'/>
+                <div className='col-span-2'>
+                  <h1 className='text-xs'>Meditation</h1>
+                  <p>{totalMeditation} <span className='text-xs'>Minutes</span></p>
+                </div>
+              </div>
+
+              <div className='grid grid-cols-3 items-center gap-2 p-3 rounded-md text-white bg-gradient-to-r from-indigo-500 to-purple-600'>
+                <Image src='/sleep.jpg' alt='sleep' width={40} height={40} className='rounded-full'/>
+                <div className='col-span-2'>
+                  <h1 className='text-xs'>Average Sleep</h1>
+                  <p>{avgSleep} <span className='text-xs'>Hours</span></p>
+                </div>
+              </div>
+
+            </section>
+
+            {/* QUOTE */}
+            {latestLog && (
+              <section className='flex rounded-md w-full items-center bg-gradient-to-r from-emerald-400 to-teal-500 mt-3 p-3 text-center'>
+                <div className='w-full'>
+                  <h2 className='text-sm'>Quote of the Day</h2>
+                  <p className='text-[12px]'>{latestLog.quote_of_the_day}</p>
+                </div>
+              </section>
+            )}
+
+            {/* CHART + MEDAL */}
+            <section className='grid grid-cols-2 mt-3 gap-4 w-full'>
+              <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-[#212121] rounded-md">
+                <Doughnut data={doughnutData} />
+              </div>
+
+              <div className='flex flex-col items-center justify-center'>
+                {logCount >= 2 ? (
+                  <>
+                    <Image src={`/${getMedal(logCount)}.png`} alt='medal' width={100} height={100}/>
+                    <p className='text-[12px] text-center mt-2'>
+                      {getMedal(logCount)} medal for your dedication!
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <Image src='/tomandjerry.png' alt='no medal' width={100} height={100}/>
+                    <p className='text-[12px] text-center mt-2'>
+                      Create 3 logs to earn your first medal 🏅
+                    </p>
+                  </>
+                )}
+              </div>
+            </section>
+          </>
+        )}
       </div>
 
+      {/* RIGHT SIDE */}
       <div className='flex flex-col rounded-lg'>
-        <section className='bg-inherit text-dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)] rounded-lg'>
+        <section className='bg-inherit rounded-lg'>
           <Calendar
             onChange={(value) => setDate(value as Date)}
             value={date}
-            className={calendarClasses}
+            className={calendarClasses.join(' ')}
           />
         </section>
-        <section className='flex w-full mt-2 items-center'>
-          <h1 className='flex text-[12px]'> <span className='mr-2 dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)]'>{userDetails?.username}'s</span> Recent Logs</h1>
-        </section>
-        <section className=' flex w-full  mt-3 flex-col'>
-          {userLogs.map((log)=>(
-              <div key={log.id} className='flex flex-col w-full items-center justify-center '>
-                <section className='bg-gray-100 grid grid-cols-3 gap-2 w-full items-center justify-center h-22 p-2 mb-2 rounded-md dark:bg-[#212121]'>
-                  <Image 
-                  src='/health.jpg'
-                  alt='hero'
-                  width={100}
-                  height={100}
-                  className='w-10 h-10 rounded-full block  object-cover'
-                  />
-                  <div className='col-span-2 flex w-full items-center flex-col '>
-                    <h1 className='flex text-[13px] w-full text-dark:text-[#59ffb1cc] text-[rgba(8,185,103,0.8)]'>{log.hashtag}</h1>
-                    <h3 className='mt-1 flex w-full text-[10px]'>Your lows</h3>
-                    <p className='mt-1 flex w-full text-[10px]'>{log.low_moments}</p>
-
-                  </div>
-                  
-                </section>
-              </div>
-            ))}
-        </section>
       </div>
-      
+
     </div>
   )
 }
