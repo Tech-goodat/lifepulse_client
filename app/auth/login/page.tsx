@@ -45,6 +45,7 @@ const LogIn = () => {
       sessionStorage.setItem(
         'token', data.access_token
       )
+      sessionStorage.setItem('id', data.id)
        router.push('/dashboard')
     }))
     .catch(error=>{console.error('failed to log in', error)})
