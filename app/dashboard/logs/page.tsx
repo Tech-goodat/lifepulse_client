@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
 
 interface LogForm {
   hashtag: string
@@ -14,6 +15,7 @@ interface LogForm {
 }
 
 const Logs = () => {
+  const router=useRouter()
   const [formData, setFormData] = useState<LogForm>({
     hashtag: '',
     average_sleep: 0,
@@ -91,6 +93,7 @@ const Logs = () => {
         cope_up: '',
         quote_of_the_day: ''
       })
+       router.push('/dashboard')
     } catch (err: any) {
       setError(err.message || 'Something went wrong')
     } finally {
